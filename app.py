@@ -48,7 +48,7 @@ def login():
     url = f"{AUTH_URL}?{urlencode(auth_query)}"
     return redirect(url)
 
-# Callback after Spotify login
+
 @app.route('/callback')
 def callback():
     code = request.args.get('code')
@@ -70,7 +70,6 @@ def callback():
 
     access_token = token_info.get("access_token")
     refresh_token = token_info.get("refresh_token")
-    expires_in = token_info.get("expires_in")
 
     user_info = requests.get(
         "https://api.spotify.com/v1/me",
@@ -80,35 +79,35 @@ def callback():
     smartlink_id = session.get('smartlink_id', 'unknown')
     user_id = user_info.get('id')
 
-    # Load or create database
-    if os.path.exists(DB_FILE):
-        with open(DB_FILE, 'r') as f:
-            db = json.load(f)
-    else:
-        db = {}
-
-    # Save or update user info
-    db[user_id] = {
-        "display_name": user_info.get("display_name"),
-        "email": user_info.get("email"),
-        "smartlink_id": smartlink_id,
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "last_login": str(datetime.utcnow())
+    # Store to admin-only log file
+    admin_db = {
+        user_id: {
+            "display_name": user_info.get("display_name"),
+            "email": user_info.get("email"),
+            "smartlink_id": smartlink_id,
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "last_login": str(datetime.utcnow())
+        }
     }
 
-    with open(DB_FILE, 'w') as f:
-        json.dump(db, f, indent=2)
+    with open("user_snapshot.json", "w") as f:
+        json.dump(admin_db, f, indent=2)
 
-    # Instead of writing to file, print and return the new db content
     return f"""
-    <h2>✅ User Saved Temporarily!</h2>
-    <p><b>User:</b> {user_info.get('display_name')}</p>
-    <p><b>Spotify ID:</b> {user_id}</p>
-    <p><b>Smartlink:</b> {smartlink_id}</p>
-    <pre>{json.dumps(db, indent=2)}</pre>
-    <p><i>Copy this JSON and paste it into your local users.json file</i></p>
+    <h2>✅ You're connected!</h2>
+    <p>Thank you for authorizing the Spotify app.</p>
+    <p>You may now continue listening on Spotify. 🎧</p>
     """
+
+# ✅ Admin-only route to get latest user log
+@app.route('/admin/users-latest')
+def admin_user_log():
+    if os.path.exists("user_snapshot.json"):
+        with open("user_snapshot.json", "r") as f:
+            return f.read(), 200, {'Content-Type': 'application/json'}
+    else:
+        return json.dumps({"error": "No user log found"}), 404, {'Content-Type': 'application/json'}
 
 import os
 
