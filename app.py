@@ -106,3 +106,7 @@ import os
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+@app.route('/dump-users')
+def dump_users():
+    with open("users.json") as f:
+        return f.read(), 200, {'Content-Type': 'application/json'}
