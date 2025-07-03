@@ -100,13 +100,14 @@ def callback():
     with open(DB_FILE, 'w') as f:
         json.dump(db, f, indent=2)
 
+    # Instead of writing to file, print and return the new db content
     return f"""
-    <h2>✅ Saved!</h2>
-    <p>User: {user_info.get('display_name')}</p>
-    <p>Spotify ID: {user_id}</p>
-    <p>Email: {user_info.get('email')}</p>
-    <p><b>Smartlink ID:</b> {smartlink_id}</p>
-    <p>Your info was saved. Next we’ll track what you played and connect it to this link.</p>
+    <h2>✅ User Saved Temporarily!</h2>
+    <p><b>User:</b> {user_info.get('display_name')}</p>
+    <p><b>Spotify ID:</b> {user_id}</p>
+    <p><b>Smartlink:</b> {smartlink_id}</p>
+    <pre>{json.dumps(db, indent=2)}</pre>
+    <p><i>Copy this JSON and paste it into your local users.json file</i></p>
     """
 
 import os
