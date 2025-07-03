@@ -101,5 +101,8 @@ def callback():
     <p>Your info was saved. Next we’ll track what you played and connect it to this link.</p>
     """
 
+import os
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
