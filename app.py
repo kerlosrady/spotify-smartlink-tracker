@@ -21,6 +21,14 @@ AUTH_URL = "https://accounts.spotify.com/authorize"
 TOKEN_URL = "https://accounts.spotify.com/api/token"
 
 DB_FILE = "users.json"
+# === Add dump route BEFORE app.run ===
+@app.route('/dump-users')
+def dump_users():
+    if os.path.exists(DB_FILE):
+        with open(DB_FILE, "r") as f:
+            return f.read(), 200, {'Content-Type': 'application/json'}
+    else:
+        return json.dumps({"error": "No users found."}), 404, {'Content-Type': 'application/json'}
 
 # ✅ MISSING ROUTE: handles smartlink clicks like /s/techno-drop
 @app.route('/s/<link_id>')
@@ -106,7 +114,3 @@ import os
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-@app.route('/dump-users')
-def dump_users():
-    with open("users.json") as f:
-        return f.read(), 200, {'Content-Type': 'application/json'}
