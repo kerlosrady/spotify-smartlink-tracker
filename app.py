@@ -58,6 +58,13 @@ def login():
     return redirect(url)
 
 
+@app.route('/debug')
+def debug():
+    try:
+        raise Exception("🔥 Manual debug error to test error handling")
+    except Exception as e:
+        import traceback
+        return f"<h3>DEBUG ERROR:</h3><pre>{str(e)}\n\n{traceback.format_exc()}</pre>", 500
 
 @app.route('/callback')
 def callback():
@@ -132,4 +139,4 @@ import os
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=True)
