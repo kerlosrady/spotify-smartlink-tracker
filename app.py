@@ -71,8 +71,9 @@ def callback():
     try:
         code = request.args.get('code')
         if not code:
-            raise Exception("Missing 'code' in request.")
+            return "<h3>❌ Missing authorization code. Please go through the smartlink again.</h3>", 400
 
+        # Exchange code for access token
         token_data = {
             "grant_type": "authorization_code",
             "code": code,
@@ -81,42 +82,61 @@ def callback():
             "client_secret": SPOTIFY_CLIENT_SECRET
         }
 
-        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        headers = { "Content-Type": "application/x-www-form-urlencoded" }
         r = requests.post(TOKEN_URL, data=token_data, headers=headers)
+
+        if r.status_code != 200:
+            return f"<h3>❌ Spotify token exchange failed:</h3><pre>{r.status_code} - {r.text}</pre>", 400
+
         token_info = r.json()
-
         access_token = token_info.get("access_token")
+        refresh_token = token_info.get("refresh_token")
+
         if not access_token:
-            raise Exception(f"Spotify token response error: {r.text}")
+            return "<h3>❌ Access token missing. Please retry.</h3>", 400
 
-        user_info = requests.get(
+        # Get user profile from Spotify
+        user_resp = requests.get(
             "https://api.spotify.com/v1/me",
-            headers={"Authorization": f"Bearer {access_token}"}
-        ).json()
+            headers={ "Authorization": f"Bearer {access_token}" }
+        )
 
-        if "id" not in user_info:
-            raise Exception(f"Spotify user response error: {json.dumps(user_info)}")
+        if user_resp.status_code != 200:
+            return f"<h3>❌ Failed to fetch Spotify user:</h3><pre>{user_resp.status_code} - {user_resp.text}</pre>", 400
 
-        user_id = user_info["id"]
+        user_info = user_resp.json()
+        user_id = user_info.get("id")
+        if not user_id:
+            return "<h3>❌ User ID not found in Spotify response.</h3>", 400
+
         smartlink_id = session.get('smartlink_id', 'unknown')
 
+        # Prepare user data
         user_data = {
             "display_name": user_info.get("display_name"),
             "email": user_info.get("email"),
             "smartlink_id": smartlink_id,
             "access_token": access_token,
-            "refresh_token": token_info.get("refresh_token"),
+            "refresh_token": refresh_token,
             "last_login": str(datetime.utcnow())
         }
 
         # Save to Firestore
         db.collection("users").document(user_id).set(user_data)
 
-        return f"<h2>✅ Success</h2><p>User {user_id} linked to {smartlink_id}</p>"
+        # Clear session to avoid collisions in future
+        session.clear()
+
+        return f"""
+        <h2>✅ Success!</h2>
+        <p>User: {user_data['display_name']} ({user_id})</p>
+        <p>Smartlink: <b>{smartlink_id}</b></p>
+        <p>Your Spotify account is linked. You may now close this tab and start listening 🎧</p>
+        """
 
     except Exception as e:
         import traceback
-        return f"<h3>❌ Exception:</h3><pre>{str(e)}\n\n{traceback.format_exc()}</pre>", 500
+        return f"<h3>❌ Unexpected Error:</h3><pre>{str(e)}\n\n{traceback.format_exc()}</pre>", 500
 
 
 @app.route('/admin/users')
