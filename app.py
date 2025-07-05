@@ -58,52 +58,77 @@ def login():
     return redirect(url)
 
 
+
 @app.route('/callback')
 def callback():
-    code = request.args.get('code')
+    try:
+        code = request.args.get('code')
+        if not code:
+            return "<h3>❌ Missing 'code' from Spotify redirect.</h3>", 400
 
-    token_data = {
-        "grant_type": "authorization_code",
-        "code": code,
-        "redirect_uri": REDIRECT_URI,
-        "client_id": SPOTIFY_CLIENT_ID,
-        "client_secret": SPOTIFY_CLIENT_SECRET
-    }
+        # Exchange code for access token
+        token_data = {
+            "grant_type": "authorization_code",
+            "code": code,
+            "redirect_uri": REDIRECT_URI,
+            "client_id": SPOTIFY_CLIENT_ID,
+            "client_secret": SPOTIFY_CLIENT_SECRET
+        }
 
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
+        headers = { "Content-Type": "application/x-www-form-urlencoded" }
+        r = requests.post(TOKEN_URL, data=token_data, headers=headers)
+        if r.status_code != 200:
+            return f"<h3>❌ Spotify token exchange failed:</h3><pre>{r.text}</pre>", 400
 
-    r = requests.post(TOKEN_URL, data=token_data, headers=headers)
-    token_info = r.json()
+        token_info = r.json()
+        access_token = token_info.get("access_token")
+        refresh_token = token_info.get("refresh_token")
 
-    access_token = token_info.get("access_token")
-    refresh_token = token_info.get("refresh_token")
+        if not access_token:
+            return "<h3>❌ Missing access token in Spotify response.</h3>", 400
 
-    user_info = requests.get(
-        "https://api.spotify.com/v1/me",
-        headers={"Authorization": f"Bearer {access_token}"}
-    ).json()
+        # Get user profile from Spotify
+        user_resp = requests.get(
+            "https://api.spotify.com/v1/me",
+            headers={ "Authorization": f"Bearer {access_token}" }
+        )
+        if user_resp.status_code != 200:
+            return f"<h3>❌ Spotify user info fetch failed:</h3><pre>{user_resp.text}</pre>", 400
 
-    smartlink_id = session.get('smartlink_id', 'unknown')
-    user_id = user_info.get('id')
+        user_info = user_resp.json()
+        user_id = user_info.get('id')
+        if not user_id:
+            return "<h3>❌ Could not extract Spotify user ID.</h3>", 400
 
-    user_data = {
-        "display_name": user_info.get("display_name"),
-        "email": user_info.get("email"),
-        "smartlink_id": smartlink_id,
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "last_login": str(datetime.utcnow())
-    }
+        smartlink_id = session.get('smartlink_id', 'unknown')
 
-    # ✅ Save to Firestore
-    db.collection("users").document(user_id).set(user_data)
+        user_data = {
+            "display_name": user_info.get("display_name"),
+            "email": user_info.get("email"),
+            "smartlink_id": smartlink_id,
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "last_login": str(datetime.utcnow())
+        }
 
-    return f"""
-    <h2>✅ You're connected!</h2>
-    <p>Thanks for authorizing the app. You may now enjoy your playlist 🎧</p>
-    """
+        # Save to Firestore
+        try:
+            db.collection("users").document(user_id).set(user_data)
+        except Exception as db_err:
+            print("❌ Firestore error:", db_err)
+            return "<h3>❌ Failed to save user to Firestore.</h3>", 500
+
+        return f"""
+        <h2>✅ You're connected!</h2>
+        <p>Welcome, {user_info.get("display_name") or "user"} 🎧</p>
+        <p>Your account has been linked via smartlink <b>{smartlink_id}</b>.</p>
+        """
+
+    except Exception as e:
+        print("❌ Unexpected error in /callback:", str(e))
+        return f"<h3>❌ Unexpected error occurred:</h3><pre>{str(e)}</pre>", 500
+
+
 @app.route('/admin/users')
 def list_users():
     users_ref = db.collection("users").stream()
