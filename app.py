@@ -64,9 +64,8 @@ def callback():
     try:
         code = request.args.get('code')
         if not code:
-            return "<h3>❌ Missing 'code' from Spotify redirect.</h3>", 400
+            raise Exception("Missing 'code' in request.")
 
-        # Exchange code for access token
         token_data = {
             "grant_type": "authorization_code",
             "code": code,
@@ -75,31 +74,23 @@ def callback():
             "client_secret": SPOTIFY_CLIENT_SECRET
         }
 
-        headers = { "Content-Type": "application/x-www-form-urlencoded" }
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
         r = requests.post(TOKEN_URL, data=token_data, headers=headers)
-        if r.status_code != 200:
-            return f"<h3>❌ Spotify token exchange failed:</h3><pre>{r.text}</pre>", 400
-
         token_info = r.json()
+
         access_token = token_info.get("access_token")
-        refresh_token = token_info.get("refresh_token")
-
         if not access_token:
-            return "<h3>❌ Missing access token in Spotify response.</h3>", 400
+            raise Exception(f"Spotify token response error: {r.text}")
 
-        # Get user profile from Spotify
-        user_resp = requests.get(
+        user_info = requests.get(
             "https://api.spotify.com/v1/me",
-            headers={ "Authorization": f"Bearer {access_token}" }
-        )
-        if user_resp.status_code != 200:
-            return f"<h3>❌ Spotify user info fetch failed:</h3><pre>{user_resp.text}</pre>", 400
+            headers={"Authorization": f"Bearer {access_token}"}
+        ).json()
 
-        user_info = user_resp.json()
-        user_id = user_info.get('id')
-        if not user_id:
-            return "<h3>❌ Could not extract Spotify user ID.</h3>", 400
+        if "id" not in user_info:
+            raise Exception(f"Spotify user response error: {json.dumps(user_info)}")
 
+        user_id = user_info["id"]
         smartlink_id = session.get('smartlink_id', 'unknown')
 
         user_data = {
@@ -107,26 +98,18 @@ def callback():
             "email": user_info.get("email"),
             "smartlink_id": smartlink_id,
             "access_token": access_token,
-            "refresh_token": refresh_token,
+            "refresh_token": token_info.get("refresh_token"),
             "last_login": str(datetime.utcnow())
         }
 
         # Save to Firestore
-        try:
-            db.collection("users").document(user_id).set(user_data)
-        except Exception as db_err:
-            print("❌ Firestore error:", db_err)
-            return "<h3>❌ Failed to save user to Firestore.</h3>", 500
+        db.collection("users").document(user_id).set(user_data)
 
-        return f"""
-        <h2>✅ You're connected!</h2>
-        <p>Welcome, {user_info.get("display_name") or "user"} 🎧</p>
-        <p>Your account has been linked via smartlink <b>{smartlink_id}</b>.</p>
-        """
+        return f"<h2>✅ Success</h2><p>User {user_id} linked to {smartlink_id}</p>"
 
     except Exception as e:
-        print("❌ Unexpected error in /callback:", str(e))
-        return f"<h3>❌ Unexpected error occurred:</h3><pre>{str(e)}</pre>", 500
+        import traceback
+        return f"<h3>❌ Exception:</h3><pre>{str(e)}\n\n{traceback.format_exc()}</pre>", 500
 
 
 @app.route('/admin/users')
