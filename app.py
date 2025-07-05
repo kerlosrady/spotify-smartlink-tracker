@@ -8,6 +8,15 @@ from urllib.parse import urlencode
 
 # === Load env vars ===
 load_dotenv()
+import firebase_admin
+from firebase_admin import credentials, firestore
+
+# Initialize Firebase app
+if not firebase_admin._apps:
+    cred = credentials.Certificate("firebase_key.json")
+    firebase_admin.initialize_app(cred)
+
+db = firestore.client()
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -79,26 +88,28 @@ def callback():
     smartlink_id = session.get('smartlink_id', 'unknown')
     user_id = user_info.get('id')
 
-    # Store to admin-only log file
-    admin_db = {
-        user_id: {
-            "display_name": user_info.get("display_name"),
-            "email": user_info.get("email"),
-            "smartlink_id": smartlink_id,
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-            "last_login": str(datetime.utcnow())
-        }
+    user_data = {
+        "display_name": user_info.get("display_name"),
+        "email": user_info.get("email"),
+        "smartlink_id": smartlink_id,
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "last_login": str(datetime.utcnow())
     }
 
-    with open("user_snapshot.json", "w") as f:
-        json.dump(admin_db, f, indent=2)
+    # ✅ Save to Firestore
+    db.collection("users").document(user_id).set(user_data)
 
     return f"""
     <h2>✅ You're connected!</h2>
-    <p>Thank you for authorizing the Spotify app.</p>
-    <p>You may now continue listening on Spotify. 🎧</p>
+    <p>Thanks for authorizing the app. You may now enjoy your playlist 🎧</p>
     """
+@app.route('/admin/users')
+def list_users():
+    users_ref = db.collection("users").stream()
+    output = {doc.id: doc.to_dict() for doc in users_ref}
+    return json.dumps(output, indent=2), 200, {'Content-Type': 'application/json'}
+
 
 # ✅ Admin-only route to get latest user log
 @app.route('/admin/users-latest')
