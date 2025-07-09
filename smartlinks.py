@@ -6,6 +6,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import firebase_admin
 from firebase_admin import credentials, firestore
+from flask import url_for
 
 import os
 
@@ -54,8 +55,8 @@ def create_smartlink():
             "url": metadata["url"]
         })
 
-        return f"✅ Smartlink created: <a href='/s/{slug}'>/s/{slug}</a>"
-
+        link = f"https://spotify-smartlink-tracker.onrender.com/s/{slug}"
+        return render_template("smartlink_success.html", link=link)
     return render_template("home.html")
 
 
