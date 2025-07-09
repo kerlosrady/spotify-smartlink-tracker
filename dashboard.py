@@ -18,12 +18,15 @@ def dashboard():
     return render_template("dashboard.html", links=links)
 
 
-@app.route('/delete/<slug>', methods=["POST"])
+@dashboard_bp.route('/delete/<slug>', methods=["POST"])
 def delete_link(slug):
+    from flask import session, redirect
+
     user_id = session.get("user_id")
     if not user_id:
         return redirect("/login")
 
+    db = firestore.client()
     doc_ref = db.collection("users").document(user_id).collection("links").document(slug)
     doc_ref.delete()
     return redirect("/dashboard")
