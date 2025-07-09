@@ -156,6 +156,8 @@ def admin_user_log():
         return json.dumps({"error": "No user log found"}), 404, {'Content-Type': 'application/json'}
 
 import os
+from smartlinks import smartlink_bp
+app.register_blueprint(smartlink_bp)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
