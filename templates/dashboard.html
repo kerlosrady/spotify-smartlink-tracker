@@ -1,0 +1,106 @@
+<!-- dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MagicPlay Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+    body {
+      background: #121212;
+      color: #fff;
+      padding: 40px 20px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 30px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .card {
+      background: #1e1e1e;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .card img {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    .title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .stats {
+      font-size: 0.85rem;
+      color: #bbb;
+      margin-bottom: 15px;
+    }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      padding: 8px 16px;
+      background: #1db954;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .btn.delete {
+      background: #e74c3c;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎛 Your MagicPlay Smartlinks</h1>
+  <div class="grid">
+    {% for link in links %}
+    <div class="card">
+      <img src="{{ link.cover }}" alt="Cover">
+      <div class="title">{{ link.name }}</div>
+      <div class="stats">
+        Link: <a href="/s/{{ link.slug }}" target="_blank">/s/{{ link.slug }}</a><br>
+        Visits: {{ link.visits or 0 }}<br>
+        Created: {{ link.created_at.to_date().strftime('%Y-%m-%d') if link.created_at else 'N/A' }}
+      </div>
+      <div class="btn-group">
+        <button class="btn" onclick="copyToClipboard('{{ request.host_url }}s/{{ link.slug }}')">📋 Copy</button>
+        <form method="POST" action="/delete/{{ link.slug }}">
+          <button type="submit" class="btn delete">🗑 Delete</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <script>
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Link copied to clipboard!");
+      });
+    }
+  </script>
+</body>
+</html>
