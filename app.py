@@ -5,6 +5,8 @@ from datetime import datetime
 from flask import Flask, redirect, request, session
 from dotenv import load_dotenv
 from urllib.parse import urlencode
+from dashboard import dashboard_bp
+
 
 # === Load env vars ===
 load_dotenv()
@@ -158,6 +160,7 @@ def admin_user_log():
 import os
 from smartlinks import smartlink_bp
 app.register_blueprint(smartlink_bp)
+app.register_blueprint(dashboard_bp)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
