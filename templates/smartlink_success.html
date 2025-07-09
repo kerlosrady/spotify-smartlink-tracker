@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smartlink Created – Magic Records</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #121212;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      text-align: center;
+    }
+    .box {
+      background: #1e1e1e;
+      padding: 40px;
+      border-radius: 16px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+    }
+    .link-box {
+      background: #2a2a2a;
+      padding: 12px;
+      border-radius: 8px;
+      word-break: break-all;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 12px 24px;
+      background: #1db954;
+      color: white;
+      border: none;
+      border-radius: 24px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin: 10px;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #1ed760;
+    }
+    .footer {
+      margin-top: 30px;
+      font-size: 0.8rem;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="box">
+    <h2>✅ Your Smartlink is Ready!</h2>
+    <div class="link-box" id="smartlink">{{ link }}</div>
+    <button onclick="copyLink()">📋 Copy to Clipboard</button>
+    <a href="/smartlink"><button>➕ Create Another</button></a>
+  </div>
+
+  <div class="footer">© 2025 Magic Records</div>
+
+  <script>
+    function copyLink() {
+      const text = document.getElementById('smartlink').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Link copied to clipboard!");
+      });
+    }
+  </script>
+
+</body>
+</html>
