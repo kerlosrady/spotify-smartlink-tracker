@@ -15,8 +15,8 @@ def dashboard():
         session['user_id'] = "test-user"
 
     db = firestore.client()  # ✅ Moved inside function to avoid circular import
-    links_ref = db.collection("users").document(user_id).collection("links").order_by("created_at", direction=firestore.Query.DESCENDING)
-    links = [doc.to_dict() for doc in links_ref.stream()]
+    docs = db.collection("links").stream()
+    links = [doc.to_dict() | {"id": doc.id} for doc in docs]
     return render_template("dashboard.html", links=links)
 
 
