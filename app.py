@@ -41,7 +41,7 @@ def dump_users():
 
 @app.route('/login')
 def login():
-    from_link = request.args.get("from")
+    from_link = request.args.get("from")  # e.g., abc123
     if from_link:
         session['smartlink_id'] = from_link
 
@@ -105,6 +105,7 @@ def callback():
         if not user_id:
             return "<h3>❌ User ID not found in Spotify response.</h3>", 400
 
+        
         smartlink_id = session.get('smartlink_id', 'unknown')
 
         # Prepare user data
@@ -120,15 +121,18 @@ def callback():
         # Save to Firestore
         db.collection("users").document(user_id).set(user_data)
 
-        # Clear session to avoid collisions in future
-        session.clear()
 
-        return f"""
-        <h2>✅ Success!</h2>
-        <p>User: {user_data['display_name']} ({user_id})</p>
-        <p>Smartlink: <b>{smartlink_id}</b></p>
-        <p>Your Spotify account is linked. You may now close this tab and start listening 🎧</p>
-        """
+        # Lookup smartlink URL from slug
+        if smartlink_id != "unknown":
+            doc = db.collection("smartlinks").document(smartlink_id).get()
+            if doc.exists:
+                playlist_url = doc.to_dict()["url"]
+                session.clear()
+                return redirect(playlist_url)
+        
+        # fallback if slug is missing or broken
+        session.clear()
+        return redirect("/")
 
     except Exception as e:
         import traceback
