@@ -83,7 +83,7 @@
       <div class="stats">
         Link: <a href="/s/{{ link.slug }}" target="_blank">/s/{{ link.slug }}</a><br>
         Visits: {{ link.visits or 0 }}<br>
-        Created: {{ link.created_at.to_date().strftime('%Y-%m-%d') if link.created_at else 'N/A' }}
+        Created: {{ link.created_at.strftime('%Y-%m-%d') if link.created_at else 'N/A' }}
       </div>
       <div class="btn-group">
         <button class="btn" onclick="copyToClipboard('{{ request.host_url }}s/{{ link.slug }}')">📋 Copy</button>
