@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, session, redirect
 from firebase_admin import firestore
+from app import db
 
 # Blueprint
 dashboard_bp = Blueprint("dashboard", __name__, template_folder="templates")
