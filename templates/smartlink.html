@@ -13,15 +13,7 @@
       font-family: 'Inter', sans-serif;
       box-sizing: border-box;
     }
-    body {
-      background: #121212;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      padding: 20px;
-    }
+   
     .card {
       background: #1e1e1e;
       padding: 30px;
@@ -56,16 +48,24 @@
       cursor: pointer;
       transition: background 0.2s ease-in-out;
     }
-    .card button:hover {
-      background: #1ed760;
-    }
-    footer.footer {
-  text-align: center;
-  margin-top: 30px;
-  font-size: 0.8rem;
-  color: #666;
+
+   body {
+  background: #121212;
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
 }
+
     @keyframes fadeIn {
       from {opacity: 0; transform: translateY(20px);}
       to {opacity: 1; transform: translateY(0);}
@@ -73,21 +73,21 @@
   </style>
 </head>
 <body>
-  <div class="card">
-    <img src="{{ data.cover }}" alt="Playlist cover" />
-    <h2>{{ data.name }}</h2>
-    <p>Curated just for you. Listen now on Spotify.</p>
+  <div class="wrapper">
+    <div class="card">
+      <img src="{{ data.cover }}" alt="Playlist cover" />
+      <h2>{{ data.name }}</h2>
+      <p>Curated just for you. Listen now on Spotify.</p>
+      <a href="/login?from={{ data.slug }}">
+        <button>🎵 Listen with Spotify</button>
+      </a>
+    </div>
 
-    <!-- Button: Choose 1 of the following -->
-    <a href="/login?from={{ data.slug }}">
-      <button>🎵 Listen with Spotify</button>
-    </a>
-
-
+    <footer class="footer">
+      © 2025 Magic Records – All rights reserved.
+    </footer>
   </div>
+</body>
 
-<footer class="footer">
-  © 2025 Magic Records – All rights reserved.
-</footer>
 </body>
 </html>
