@@ -15,3 +15,13 @@ def dashboard():
     links = [doc.to_dict() for doc in links_ref.stream()]
 
     return render_template("dashboard.html", links=links)
+
+@app.route('/delete/<slug>', methods=["POST"])
+def delete_link(slug):
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect("/login")
+
+    doc_ref = db.collection("users").document(user_id).collection("links").document(slug)
+    doc_ref.delete()
+    return redirect("/dashboard")
