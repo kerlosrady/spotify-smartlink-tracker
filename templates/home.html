@@ -1,11 +1,105 @@
 <!DOCTYPE html>
-<html>
-<head><title>Create Smartlink</title></head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Magic Records – Create Smartlink</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      box-sizing: border-box;
+    }
+    body {
+      background: #121212;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .logo {
+      margin-bottom: 20px;
+    }
+    .logo img {
+      height: 60px;
+    }
+    .container {
+      background: #1e1e1e;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      animation: fadeIn 0.8s ease-in;
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    input[type="text"] {
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      background: #2a2a2a;
+      color: #fff;
+    }
+    input::placeholder {
+      color: #999;
+    }
+    button {
+      padding: 12px;
+      border: none;
+      background: #1db954;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background 0.2s ease-in-out;
+    }
+    button:hover {
+      background: #1ed760;
+    }
+    .footer {
+      margin-top: 30px;
+      font-size: 0.8rem;
+      color: #666;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+  </style>
+</head>
 <body>
-  <h2>🎧 Create a Smartlink</h2>
-  <form method="POST">
-    <input type="text" name="playlist_url" placeholder="Spotify Playlist URL" required style="width:300px;">
-    <button type="submit">Generate</button>
-  </form>
+
+  <div class="logo">
+    <img src="https://cdn.magic-records.com/logo/magicrecords_white.png" alt="Magic Records Logo" />
+  </div>
+
+  <div class="container">
+    <h2>🎧 Create a Smartlink</h2>
+    <form method="POST">
+      <input type="text" name="playlist_url" placeholder="Paste your Spotify playlist link..." required />
+      <button type="submit">Generate Smartlink</button>
+    </form>
+  </div>
+
+  <div class="footer">
+    © {{ now().year }} Magic Records – All rights reserved.
+  </div>
+
 </body>
 </html>
