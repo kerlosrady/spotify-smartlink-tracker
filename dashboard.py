@@ -9,8 +9,10 @@ def dashboard():
     from flask import session, redirect, render_template
 
     user_id = session.get("user_id")
-    if not user_id:
-        return redirect("/login")
+    
+    if not session.get("user_id"):
+    # TEMP: allow open access for now
+        session['user_id'] = "test-user"
 
     db = firestore.client()  # ✅ Moved inside function to avoid circular import
     links_ref = db.collection("users").document(user_id).collection("links").order_by("created_at", direction=firestore.Query.DESCENDING)
