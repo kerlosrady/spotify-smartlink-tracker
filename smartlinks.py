@@ -6,6 +6,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import firebase_admin
 from firebase_admin import credentials, firestore
+from google.cloud.firestore_v1 import SERVER_TIMESTAMP
 from flask import url_for
 
 import os
@@ -48,12 +49,15 @@ def create_smartlink():
         metadata = extract_playlist_metadata(playlist_url)
         slug = str(uuid.uuid4())[:6]
 
+
         db.collection("smartlinks").document(slug).set({
             "slug": slug,
             "name": metadata["name"],
             "cover": metadata["cover"],
-            "url": metadata["url"]
+            "url": metadata["url"],
+            "created_at": firestore.SERVER_TIMESTAMP  # ✅ this is the fix
         })
+
 
         link = f"https://spotify-smartlink-tracker.onrender.com/s/{slug}"
         return render_template("smartlink_success.html", link=link)
