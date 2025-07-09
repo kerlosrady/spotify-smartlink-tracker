@@ -133,7 +133,10 @@ def callback():
         
         # fallback if slug is missing or broken
         session.clear()
-        return redirect("/")
+        # If they originally came from a smartlink or dashboard
+        next_page = request.args.get("from") or session.get("next_page") or "/dashboard"
+        return redirect(next_page)
+
 
     except Exception as e:
         import traceback
