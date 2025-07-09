@@ -39,15 +39,12 @@ def dump_users():
     else:
         return json.dumps({"error": "No users found."}), 404, {'Content-Type': 'application/json'}
 
-# ✅ MISSING ROUTE: handles smartlink clicks like /s/techno-drop
-@app.route('/s/<link_id>')
-def smartlink_redirect(link_id):
-    session['smartlink_id'] = link_id
-    return redirect('/login')
-
-# Logs into Spotify
 @app.route('/login')
 def login():
+    from_link = request.args.get("from")
+    if from_link:
+        session['smartlink_id'] = from_link
+
     auth_query = {
         "client_id": SPOTIFY_CLIENT_ID,
         "response_type": "code",
@@ -56,7 +53,6 @@ def login():
     }
     url = f"{AUTH_URL}?{urlencode(auth_query)}"
     return redirect(url)
-
 
 @app.route('/debug')
 def debug():
