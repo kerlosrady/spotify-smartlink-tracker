@@ -50,7 +50,8 @@ def login():
         "client_id": SPOTIFY_CLIENT_ID,
         "response_type": "code",
         "redirect_uri": REDIRECT_URI,
-        "scope": SCOPE
+        "scope": SCOPE,
+        "show_dialog": "true"  # 🔁 Force Spotify to show login prompt
     }
     url = f"{AUTH_URL}?{urlencode(auth_query)}"
     return redirect(url)
@@ -106,42 +107,32 @@ def callback():
         if not user_id:
             return "<h3>❌ User ID not found in Spotify response.</h3>", 400
 
-        
         smartlink_id = session.get('smartlink_id', 'unknown')
 
-        # Prepare user data
-        user_data = {
+        # Save user info in Firestore
+        db.collection("users").document(user_id).set({
             "display_name": user_info.get("display_name"),
             "email": user_info.get("email"),
             "smartlink_id": smartlink_id,
             "access_token": access_token,
             "refresh_token": refresh_token,
             "last_login": str(datetime.utcnow())
-        }
+        })
 
-        # Save to Firestore
-        db.collection("users").document(user_id).set(user_data)
-
-
-        # Lookup smartlink URL from slug
+        # ✅ Redirect to the smartlink's actual Spotify URL
         if smartlink_id != "unknown":
             doc = db.collection("smartlinks").document(smartlink_id).get()
             if doc.exists:
-                playlist_url = doc.to_dict()["url"]
                 session.clear()
-                return redirect(playlist_url)
-        
-        # fallback if slug is missing or broken
-        session.clear()
-        # If they originally came from a smartlink or dashboard
-        next_page = request.args.get("from") or session.get("next_page") or "/dashboard"
-        return redirect(next_page)
+                return redirect(doc.to_dict()["url"])
 
+        # Fallback: dashboard
+        session.clear()
+        return redirect("/dashboard")
 
     except Exception as e:
         import traceback
         return f"<h3>❌ Unexpected Error:</h3><pre>{str(e)}\n\n{traceback.format_exc()}</pre>", 500
-
 
 @app.route('/admin/users')
 def list_users():
