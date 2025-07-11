@@ -104,6 +104,7 @@ def callback():
 
         user_info = user_resp.json()
         user_id = user_info.get("id")
+        session['user_id'] = user_id
         if not user_id:
             return "<h3>❌ User ID not found in Spotify response.</h3>", 400
 
