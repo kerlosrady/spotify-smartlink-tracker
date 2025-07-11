@@ -146,6 +146,11 @@ def list_users():
     output = {doc.id: doc.to_dict() for doc in users_ref}
     return json.dumps(output, indent=2), 200, {'Content-Type': 'application/json'}
 
+@app.route("/logout")
+def logout():
+    session.clear()
+    return "✅ Session cleared. You can now test login again."
+
 
 # ✅ Admin-only route to get latest user log
 @app.route('/admin/users-latest')
