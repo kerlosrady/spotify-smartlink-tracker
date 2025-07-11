@@ -104,31 +104,36 @@ def callback():
 
         user_info = user_resp.json()
         user_id = user_info.get("id")
-        session['user_id'] = user_id
         if not user_id:
             return "<h3>❌ User ID not found in Spotify response.</h3>", 400
 
+        # ✅ Set user session so future visits skip login
+        session['user_id'] = user_id
+
         smartlink_id = session.get('smartlink_id', 'unknown')
 
-        # Save user info in Firestore
-        db.collection("users").document(user_id).set({
+        # Prepare user data
+        user_data = {
             "display_name": user_info.get("display_name"),
             "email": user_info.get("email"),
             "smartlink_id": smartlink_id,
             "access_token": access_token,
             "refresh_token": refresh_token,
             "last_login": str(datetime.utcnow())
-        })
+        }
 
-        # ✅ Redirect to the smartlink's actual Spotify URL
+        # Save to Firestore
+        db.collection("users").document(user_id).set(user_data)
+
+        # Lookup smartlink URL from slug
         if smartlink_id != "unknown":
             doc = db.collection("smartlinks").document(smartlink_id).get()
             if doc.exists:
-                session.clear()
-                return redirect(doc.to_dict()["url"])
+                playlist_url = doc.to_dict()["url"]
+                session.pop("smartlink_id", None)  # Clear after use
+                return redirect(playlist_url)
 
-        # Fallback: dashboard
-        session.clear()
+        # fallback: go to dashboard
         return redirect("/dashboard")
 
     except Exception as e:
