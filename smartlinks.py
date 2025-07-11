@@ -1,6 +1,7 @@
 # smartlinks.py
 
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, session, redirect
+
 import uuid
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
