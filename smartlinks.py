@@ -67,7 +67,7 @@ def create_smartlink():
 
 @smartlink_bp.route("/s/<slug>")
 def smartlink_page(slug):
-    from flask import session, redirect, render_template
+    from flask import session, redirect, request
 
     doc = db.collection("smartlinks").document(slug).get()
     if not doc.exists:
@@ -75,11 +75,14 @@ def smartlink_page(slug):
 
     data = doc.to_dict()
 
-    # ✅ If already logged in, redirect directly to Spotify playlist
-    if session.get("user_id"):
-        return redirect(data["url"])
+    # ✅ Debug: print session content
+    print("SESSION STATE:", session)
 
-    # Else: ask for login, then redirect back to this slug
+    if "user_id" in session:
+        return redirect(data["url"])
+    
+    # 🚨 Enforce login: redirect to Spotify auth
     session["smartlink_id"] = slug
     return redirect(f"/login?from={slug}")
+
 
