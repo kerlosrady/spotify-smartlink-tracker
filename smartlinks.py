@@ -71,4 +71,10 @@ def smartlink_page(slug):
         return "Smartlink not found 😢", 404
 
     data = doc.to_dict()
-    return render_template("smartlink.html", data=data)
+
+    # Check if user already logged in
+    if session.get("user_id"):
+        return redirect(data["url"])  # ✅ Send directly to Spotify
+
+    # Otherwise, ask for login
+    return redirect(f"/login?from={slug}")
