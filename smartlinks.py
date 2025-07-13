@@ -64,25 +64,36 @@ def create_smartlink():
         return render_template("smartlink_success.html", link=link)
     return render_template("home.html")
 
-
 @smartlink_bp.route("/s/<slug>")
 def smartlink_page(slug):
-    from flask import session, redirect, request
-
     doc = db.collection("smartlinks").document(slug).get()
     if not doc.exists:
         return "Smartlink not found 😢", 404
 
     data = doc.to_dict()
 
-    # ✅ Debug: print session content
-    print("SESSION STATE:", session)
+    # ✅ Always render landing page, don’t auto-redirect
+    return render_template("smartlink.html", data=data)
 
-    if "user_id" in session:
-        return redirect(data["url"])
+
+# @smartlink_bp.route("/s/<slug>")
+# def smartlink_page(slug):
+#     from flask import session, redirect, request
+
+#     doc = db.collection("smartlinks").document(slug).get()
+#     if not doc.exists:
+#         return "Smartlink not found 😢", 404
+
+#     data = doc.to_dict()
+
+#     # ✅ Debug: print session content
+#     print("SESSION STATE:", session)
+
+#     if "user_id" in session:
+#         return redirect(data["url"])
     
-    # 🚨 Enforce login: redirect to Spotify auth
-    session["smartlink_id"] = slug
-    return redirect(f"/login?from={slug}")
+#     # 🚨 Enforce login: redirect to Spotify auth
+#     session["smartlink_id"] = slug
+#     return redirect(f"/login?from={slug}")
 
 
