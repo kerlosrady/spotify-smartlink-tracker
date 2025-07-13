@@ -40,6 +40,24 @@ def dump_users():
     else:
         return json.dumps({"error": "No users found."}), 404, {'Content-Type': 'application/json'}
 
+import time
+
+def get_user_info_with_retry(access_token, retries=3, delay=2):
+    for i in range(retries):
+        user_resp = requests.get(
+            "https://api.spotify.com/v1/me",
+            headers={ "Authorization": f"Bearer {access_token}" }
+        )
+
+        if user_resp.status_code == 429:
+            retry_after = int(user_resp.headers.get("Retry-After", delay))
+            print(f"Rate limited. Retrying in {retry_after} seconds...")
+            time.sleep(retry_after)
+        else:
+            return user_resp
+    return user_resp  # return last response even if still 429
+
+
 @app.route('/login')
 def login():
     from_link = request.args.get("from")  # e.g., abc123
@@ -93,11 +111,7 @@ def callback():
         if not access_token:
             return "<h3>❌ Access token missing. Please retry.</h3>", 400
 
-        # Get user profile from Spotify
-        user_resp = requests.get(
-            "https://api.spotify.com/v1/me",
-            headers={ "Authorization": f"Bearer {access_token}" }
-        )
+        user_resp = get_user_info_with_retry(access_token)
 
         if user_resp.status_code != 200:
             return f"<h3>❌ Failed to fetch Spotify user:</h3><pre>{user_resp.status_code} - {user_resp.text}</pre>", 400
