@@ -1,32 +1,163 @@
+<!-- templates/metrics.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>{{ data.name }} Metrics</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ data.name }} – Metrics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background: #121212;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      padding: 40px 20px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 30px;
+    }
+    .back-btn {
+      display: inline-block;
+      margin-bottom: 20px;
+      background: #2e2e2e;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+    .back-btn:hover {
+      background: #1db954;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .stat {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    .stat h2 {
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+    }
+    .stat p {
+      font-size: 1.2rem;
+      color: #1db954;
+      font-weight: bold;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #1e1e1e;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 14px;
+      text-align: center;
+      border-bottom: 1px solid #333;
+    }
+    th {
+      background: #222;
+      color: #1db954;
+    }
+    tr:hover {
+      background-color: #2a2a2a;
+    }
+    canvas {
+      margin-top: 40px;
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 12px;
+    }
+  </style>
 </head>
 <body>
+  <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
   <h1>{{ data.name }} – Metrics</h1>
-  <ul>
-    <li><strong>Views:</strong> {{ metrics.views }}</li>
-    <li><strong>Clicks:</strong> {{ metrics.clicks }}</li>
-    <li><strong>CTR:</strong> {{ metrics.ctr }}%</li>
-    <li><strong>Followers:</strong> {{ metrics.followers }}</li>
-    <li><strong>Listeners:</strong> {{ metrics.listeners }}</li>
-    <li><strong>Streams:</strong> {{ metrics.streams }}</li>
-    <li><strong>S/L:</strong> {{ metrics.s_l }}</li>
-  </ul>
 
-  <h2>By Country</h2>
+  <div class="stats-grid">
+    <div class="stat"><h2>Views</h2><p>{{ data.views | int | format("{:,}") }}</p></div>
+    <div class="stat"><h2>Clicks</h2><p>{{ data.clicks | int | format("{:,}") }}</p></div>
+    <div class="stat"><h2>CTR</h2><p>{{ data.ctr }}%</p></div>
+    <div class="stat"><h2>Followers</h2><p>{{ data.followers | int | format("{:,}") }}</p></div>
+    <div class="stat"><h2>Listeners</h2><p>{{ data.listeners | int | format("{:,}") }}</p></div>
+    <div class="stat"><h2>Streams</h2><p>{{ data.streams | int | format("{:,}") }}</p></div>
+    <div class="stat"><h2>S/L</h2><p>{{ data.sl }}</p></div>
+  </div>
+
+  <canvas id="streamsChart" height="120"></canvas>
+
+  <h2 style="margin-top: 60px; text-align: center;">By Country</h2>
   <table>
-    <tr><th>Country</th><th>Followers</th><th>Listeners</th><th>Streams</th><th>SPL</th></tr>
-    {% for c in metrics.countries %}
     <tr>
-      <td>{{ c.name }}</td>
-      <td>{{ c.followers }}</td>
-      <td>{{ c.listeners }}</td>
-      <td>{{ c.streams }}</td>
-      <td>{{ c.spl }}</td>
+      <th>Country</th>
+      <th>Followers</th>
+      <th>Listeners</th>
+      <th>Streams</th>
+      <th>SPL</th>
+    </tr>
+    {% for row in data.countries %}
+    <tr>
+      <td>{{ row.country }}</td>
+      <td>{{ row.followers | int | format("{:,}") }}</td>
+      <td>{{ row.listeners | int | format("{:,}") }}</td>
+      <td>{{ row.streams | int | format("{:,}") }}</td>
+      <td>{{ row.spl }}</td>
     </tr>
     {% endfor %}
   </table>
+
+  <script>
+    const ctx = document.getElementById('streamsChart').getContext('2d');
+    const streamsChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: {{ data.trend_dates|tojson }},
+        datasets: [{
+          label: 'Streams Over Time',
+          data: {{ data.trend_values|tojson }},
+          borderColor: '#1db954',
+          backgroundColor: 'rgba(29, 185, 84, 0.2)',
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: '#bbb'
+            }
+          },
+          x: {
+            ticks: {
+              color: '#bbb'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: '#fff'
+            }
+          }
+        }
+      }
+    });
+  </script>
 </body>
 </html>
