@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ data.name }} – Metrics</title>
+  <title>{{ data.name | default("Unnamed Playlist") }} – Metrics</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -94,12 +94,12 @@
   <h1>{{ data.name | default("Unnamed Playlist") }} – Metrics</h1>
 
   <div class="stats-grid">
-    <div class="stat"><h2>Views</h2><p>{{ data.views | default(0) | int | format("{:,}") }}</p></div>
-    <div class="stat"><h2>Clicks</h2><p>{{ data.clicks | default(0) | int | format("{:,}") }}</p></div>
+    <div class="stat"><h2>Views</h2><p>{{ '{:,}'.format(data.views | default(0) | int) }}</p></div>
+    <div class="stat"><h2>Clicks</h2><p>{{ '{:,}'.format(data.clicks | default(0) | int) }}</p></div>
     <div class="stat"><h2>CTR</h2><p>{{ data.ctr | default("0.00") }}%</p></div>
-    <div class="stat"><h2>Followers</h2><p>{{ data.followers | default(0) | int | format("{:,}") }}</p></div>
-    <div class="stat"><h2>Listeners</h2><p>{{ data.listeners | default(0) | int | format("{:,}") }}</p></div>
-    <div class="stat"><h2>Streams</h2><p>{{ data.streams | default(0) | int | format("{:,}") }}</p></div>
+    <div class="stat"><h2>Followers</h2><p>{{ '{:,}'.format(data.followers | default(0) | int) }}</p></div>
+    <div class="stat"><h2>Listeners</h2><p>{{ '{:,}'.format(data.listeners | default(0) | int) }}</p></div>
+    <div class="stat"><h2>Streams</h2><p>{{ '{:,}'.format(data.streams | default(0) | int) }}</p></div>
     <div class="stat"><h2>S/L</h2><p>{{ data.sl | default("0.00") }}</p></div>
   </div>
 
@@ -117,9 +117,9 @@
     {% for row in data.countries | default([]) %}
     <tr>
       <td>{{ row.country }}</td>
-      <td>{{ row.followers | default(0) | int | format("{:,}") }}</td>
-      <td>{{ row.listeners | default(0) | int | format("{:,}") }}</td>
-      <td>{{ row.streams | default(0) | int | format("{:,}") }}</td>
+      <td>{{ '{:,}'.format(row.followers | default(0) | int) }}</td>
+      <td>{{ '{:,}'.format(row.listeners | default(0) | int) }}</td>
+      <td>{{ '{:,}'.format(row.streams | default(0) | int) }}</td>
       <td>{{ row.spl | default("0.00") }}</td>
     </tr>
     {% endfor %}
