@@ -1,8 +1,16 @@
 from flask import Blueprint, render_template, session, redirect
-from firebase_admin import firestore
 
 # Blueprint
 dashboard_bp = Blueprint("dashboard", __name__, template_folder="templates")
+import firebase_admin
+from firebase_admin import credentials, firestore
+
+# Initialize Firebase app only once
+if not firebase_admin._apps:
+    cred = credentials.Certificate("firebase_key.json")  # Make sure path is correct
+    firebase_admin.initialize_app(cred)
+
+db = firestore.client()
 
 @dashboard_bp.route("/dashboard")
 def dashboard():
