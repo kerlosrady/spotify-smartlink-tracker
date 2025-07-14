@@ -14,15 +14,17 @@
       font-family: 'Inter', sans-serif;
       padding: 40px 20px;
     }
-    h1 {
-      text-align: center;
-      font-size: 2rem;
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 30px;
     }
-    .back-btn {
-      display: inline-block;
-      margin-bottom: 20px;
-      background: #2e2e2e;
+    h1 {
+      font-size: 2rem;
+    }
+    .btn {
+      background: #1db954;
       color: #fff;
       padding: 10px 20px;
       border-radius: 20px;
@@ -30,8 +32,8 @@
       font-weight: bold;
       transition: background 0.3s ease;
     }
-    .back-btn:hover {
-      background: #1db954;
+    .btn:hover {
+      background: #17a44d;
     }
     .stats-grid {
       display: grid;
@@ -84,17 +86,21 @@
   </style>
 </head>
 <body>
-  <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
-  <h1>{{ data.name }} – Metrics</h1>
+  <header>
+    <a href="/dashboard" class="btn">← Back to Dashboard</a>
+    <a href="/smartlink" class="btn">➕ Create Smartlink</a>
+  </header>
+
+  <h1>{{ data.name | default("Unnamed Playlist") }} – Metrics</h1>
 
   <div class="stats-grid">
-    <div class="stat"><h2>Views</h2><p>{{ data.views | int | format("{:,}") }}</p></div>
-    <div class="stat"><h2>Clicks</h2><p>{{ data.clicks | int | format("{:,}") }}</p></div>
-    <div class="stat"><h2>CTR</h2><p>{{ data.ctr }}%</p></div>
-    <div class="stat"><h2>Followers</h2><p>{{ data.followers | int | format("{:,}") }}</p></div>
-    <div class="stat"><h2>Listeners</h2><p>{{ data.listeners | int | format("{:,}") }}</p></div>
-    <div class="stat"><h2>Streams</h2><p>{{ data.streams | int | format("{:,}") }}</p></div>
-    <div class="stat"><h2>S/L</h2><p>{{ data.sl }}</p></div>
+    <div class="stat"><h2>Views</h2><p>{{ data.views | default(0) | int | format("{:,}") }}</p></div>
+    <div class="stat"><h2>Clicks</h2><p>{{ data.clicks | default(0) | int | format("{:,}") }}</p></div>
+    <div class="stat"><h2>CTR</h2><p>{{ data.ctr | default("0.00") }}%</p></div>
+    <div class="stat"><h2>Followers</h2><p>{{ data.followers | default(0) | int | format("{:,}") }}</p></div>
+    <div class="stat"><h2>Listeners</h2><p>{{ data.listeners | default(0) | int | format("{:,}") }}</p></div>
+    <div class="stat"><h2>Streams</h2><p>{{ data.streams | default(0) | int | format("{:,}") }}</p></div>
+    <div class="stat"><h2>S/L</h2><p>{{ data.sl | default("0.00") }}</p></div>
   </div>
 
   <canvas id="streamsChart" height="120"></canvas>
@@ -108,13 +114,13 @@
       <th>Streams</th>
       <th>SPL</th>
     </tr>
-    {% for row in data.countries %}
+    {% for row in data.countries | default([]) %}
     <tr>
       <td>{{ row.country }}</td>
-      <td>{{ row.followers | int | format("{:,}") }}</td>
-      <td>{{ row.listeners | int | format("{:,}") }}</td>
-      <td>{{ row.streams | int | format("{:,}") }}</td>
-      <td>{{ row.spl }}</td>
+      <td>{{ row.followers | default(0) | int | format("{:,}") }}</td>
+      <td>{{ row.listeners | default(0) | int | format("{:,}") }}</td>
+      <td>{{ row.streams | default(0) | int | format("{:,}") }}</td>
+      <td>{{ row.spl | default("0.00") }}</td>
     </tr>
     {% endfor %}
   </table>
@@ -124,10 +130,10 @@
     const streamsChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: {{ data.trend_dates|tojson }},
+        labels: {{ data.trend_dates | default([]) | tojson }},
         datasets: [{
           label: 'Streams Over Time',
-          data: {{ data.trend_values|tojson }},
+          data: {{ data.trend_values | default([]) | tojson }},
           borderColor: '#1db954',
           backgroundColor: 'rgba(29, 185, 84, 0.2)',
           tension: 0.3,
