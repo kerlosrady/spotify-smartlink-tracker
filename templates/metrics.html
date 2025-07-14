@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ data.name }} Metrics</title>
+</head>
+<body>
+  <h1>{{ data.name }} – Metrics</h1>
+  <ul>
+    <li><strong>Views:</strong> {{ metrics.views }}</li>
+    <li><strong>Clicks:</strong> {{ metrics.clicks }}</li>
+    <li><strong>CTR:</strong> {{ metrics.ctr }}%</li>
+    <li><strong>Followers:</strong> {{ metrics.followers }}</li>
+    <li><strong>Listeners:</strong> {{ metrics.listeners }}</li>
+    <li><strong>Streams:</strong> {{ metrics.streams }}</li>
+    <li><strong>S/L:</strong> {{ metrics.s_l }}</li>
+  </ul>
+
+  <h2>By Country</h2>
+  <table>
+    <tr><th>Country</th><th>Followers</th><th>Listeners</th><th>Streams</th><th>SPL</th></tr>
+    {% for c in metrics.countries %}
+    <tr>
+      <td>{{ c.name }}</td>
+      <td>{{ c.followers }}</td>
+      <td>{{ c.listeners }}</td>
+      <td>{{ c.streams }}</td>
+      <td>{{ c.spl }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</body>
+</html>
