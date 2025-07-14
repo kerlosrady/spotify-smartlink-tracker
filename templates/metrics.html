@@ -137,8 +137,66 @@
     </tr>
     {% endfor %}
   </table>
+<script>
+  const dummyData = {
+    labels: [
+      "Nov 4", "Nov 11", "Nov 18", "Nov 25", "Dec 2", "Dec 9", "Dec 16",
+      "Dec 23", "Dec 30", "Jan 6", "Jan 13", "Jan 20", "Jan 27",
+      "Feb 3", "Feb 10", "Feb 17", "Feb 24", "Mar 2", "Mar 9", "Mar 16", "Mar 23",
+      "Mar 30", "Apr 6", "Apr 13", "Apr 20", "Apr 27", "May 4", "May 11",
+      "May 18", "May 25", "Jun 1", "Jun 8", "Jun 15", "Jun 22", "Jun 29", "Jul 6", "Jul 13"
+    ],
+    views: [0, 5400, 7200, 8300, 9000, 9200, 10000, 11000, 13000, 12000, 14000, 15000, 14500, 13500, 12500, 12000, 11700, 11300, 11000, 10800, 11000, 11500, 11200, 10800, 10600, 10900, 11300, 11500, 11700, 11600, 11800, 11400, 11200, 11000, 10700, 10000, 500],
+    clicks: [0, 4200, 5300, 6000, 6400, 6800, 7300, 8100, 8700, 9100, 9500, 10000, 9700, 9100, 8700, 8500, 8200, 8000, 7800, 7600, 7900, 8300, 8100, 8000, 7900, 8050, 8200, 8300, 8400, 8300, 8200, 8000, 7800, 7600, 7400, 300],
+    followers: [0, 200, 300, 400, 600, 800, 1000, 1400, 1800, 2200, 2600, 3100, 3400, 3700, 4000, 4300, 4600, 4900, 5200, 5500, 5800, 6000, 6300, 6600, 7000, 7300, 7600, 7900, 8100, 8300, 8500, 8700, 8900, 9000, 9100, 9200, 9300],
+    listeners: [0, 3000, 4000, 5000, 5800, 6500, 7200, 7800, 8400, 8900, 9400, 9800, 9700, 9500, 9400, 9300, 9200, 9100, 9000, 8900, 9100, 9300, 9200, 9100, 9000, 9150, 9300, 9400, 9500, 9400, 9300, 9200, 9100, 9000, 8900, 300],
+    streams: [0, 6000, 8000, 9600, 11000, 12500, 13500, 14500, 15500, 16500, 17500, 18000, 17500, 17000, 16500, 16000, 15500, 15000, 14500, 14000, 14500, 15000, 14800, 14500, 14300, 14800, 15300, 15700, 16000, 15900, 15700, 15400, 15100, 14800, 14500, 500],
+    sl: [0, 20, 22, 24, 25, 26, 28, 29, 30, 31, 32, 32.5, 32, 31.5, 31, 30.5, 30, 29.5, 29, 28.5, 29, 29.5, 29.3, 29, 28.8, 29, 29.3, 29.5, 30, 29.8, 29.6, 29.4, 29.2, 29, 28.5, 27.8, 15]
+  };
 
-  <script>
+  const ctx = document.getElementById('streamsChart').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: dummyData.labels,
+      datasets: [{
+        label: 'Streams Over Time',
+        data: dummyData.streams,
+        borderColor: '#1db954',
+        backgroundColor: 'rgba(29, 185, 84, 0.2)',
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: '#fff' } }
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { color: '#bbb' }},
+        x: { ticks: { color: '#bbb' }}
+      }
+    }
+  });
+
+  function updateChart(metricName, label) {
+    chart.data.datasets[0].label = label + ' Over Time';
+    chart.data.datasets[0].data = dummyData[metricName];
+    chart.update();
+  }
+
+  // Add click listeners
+  document.querySelectorAll('.stat').forEach(stat => {
+    stat.addEventListener('click', () => {
+      const metric = stat.querySelector('h2').textContent.trim().toLowerCase();
+      const metricKey = metric === 's/l' ? 'sl' : metric;
+      updateChart(metricKey, metric.toUpperCase());
+    });
+  });
+</script>
+
+<!--   <script>
     const ctx = document.getElementById('streamsChart').getContext('2d');
     const streamsChart = new Chart(ctx, {
       type: 'line',
@@ -173,6 +231,6 @@
         }
       }
     });
-  </script>
+  </script> -->
 </body>
 </html>
