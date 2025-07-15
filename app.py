@@ -118,6 +118,8 @@ def callback():
 
         user_info = user_resp.json()
         user_id = user_info.get("id")
+        country = user_info.get("country", "unknown")
+
         if not user_id:
             return "<h3>❌ User ID not found in Spotify response.</h3>", 400
 
@@ -133,6 +135,7 @@ def callback():
             "smartlink_id": smartlink_id,
             "access_token": access_token,
             "refresh_token": refresh_token,
+            "country": country,  # ✅ Save country
             "last_login": str(datetime.utcnow())
         }
 
